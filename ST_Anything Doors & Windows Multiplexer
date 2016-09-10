@@ -115,7 +115,7 @@ def BackdoorClosed(evt)
 	}
 }
 
-// --- Kitchen Windows --- 
+// --- Front Windows --- 
 def FrontwindowsOpen(evt)
 {
     if (Frontwindows.currentValue("contact") != "open") {
