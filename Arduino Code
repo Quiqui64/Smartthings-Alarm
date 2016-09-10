@@ -12,8 +12,8 @@
 #include <WiFiUdp.h> // For OTA
 #include <ArduinoOTA.h> // For OTA
 
-const char* ssid = "Casa";
-const char* password = "brownclan";
+const char* ssid = "XXXXXXXXXX";
+const char* password = "XXXXXXXXX";
 const unsigned int serverPort = 8090; // port to run the http server on esp8266, for smartthings hub
 WiFiServer server(serverPort); //server
 WiFiClient client; //client
