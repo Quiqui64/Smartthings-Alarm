@@ -1,0 +1,236 @@
+/**
+ *  esp8266 Alarm Device Handler
+ *
+ *  Copyright 2016 Jason Brown
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
+ *
+ */
+  preferences {
+  input("ip", "text", title: "IP Address", description: "ip", required: true)
+  input("port", "text", title: "Port", description: "port", required: true)
+  input("mac", "5CCF7F024CEF", title: "MAC Addr", description: "mac")
+}
+
+metadata {
+  definition (name: "esp8266 Alarm", namespace: "Quiqui64", author: "Jason Brown") {
+    capability "Refresh"
+    capability "Polling"
+    capability "Contact Sensor"
+    capability "Motion Sensor"
+    
+    attribute "Frontdoors", "string"
+    attribute "Motion", "string"
+    attribute "Frontwindows", "string"
+    attribute "Familyroomwindows", "string"
+    attribute "Kitchenwindows", "string"
+    attribute "Backdoor", "string"
+    attribute "alarmStatus", "string"
+  }
+
+  // UI tile definitions
+tiles {  
+    standardTile("Frontdoors", "device.Frontdoors", width: 1.5, height: 1.5, canChangeBackground: true, canChangeIcon: true) {
+      state "open",   label: "Fdoors", icon: "st.contact.contact.open",   backgroundColor: "#ffa81e"
+      state "closed", label: 'Fdoors', icon: "st.contact.contact.closed", backgroundColor: "#79b821"
+    }
+    standardTile("Motion", "device.Motion", width: 1.5, height: 1.5, canChangeBackground: true, canChangeIcon: true) {
+      state("active",   label:'motion',    icon:"st.motion.motion.active",   backgroundColor:"#53a7c0")
+      state("inactive", label:'no motion', icon:"st.motion.motion.inactive", backgroundColor:"#79b821")
+    }
+    standardTile("Frontwindows", "device.Frontwindows", width: 1.5, height: 1.5, canChangeBackground: true, canChangeIcon: true) {
+      state "open",   label: "Frontwind", icon: "st.contact.contact.open",   backgroundColor: "#ffa81e"
+      state "closed", label: "Frontwind", icon: "st.contact.contact.closed", backgroundColor: "#79b821"
+    }
+    standardTile("Familyroomwindows", "device.Familyroomwindows", width: 1.5, height: 1.5, canChangeBackground: true, canChangeIcon: true) {
+      state "open",   label: "FMLYwind", icon: "st.contact.contact.open",   backgroundColor: "#ffa81e"
+      state "closed", label: "FMLYwind", icon: "st.contact.contact.closed", backgroundColor: "#79b821"
+    }
+    standardTile("Kitchenwindows", "device.Kitchenwindows", width: 1.5, height: 1.5, canChangeBackground: true, canChangeIcon: true) {
+      state "open",   label: "Kitwind", icon: "st.contact.contact.open",   backgroundColor: "#ffa81e"
+      state "closed", label: "Kitwind", icon: "st.contact.contact.closed", backgroundColor: "#79b821"
+    }
+    standardTile("Backdoor", "device.Backdoor", width: 1.5, height: 1.5, canChangeBackground: true, canChangeIcon: true) {
+      state "open",   label: "Backdoor", icon: "st.contact.contact.open",   backgroundColor: "#ffa81e"
+      state "closed", label: "Backdoor", icon: "st.contact.contact.closed", backgroundColor: "#79b821"
+    }
+    standardTile("alarmStatus", "device.alarmStatus", width: 1.5, height: 1.5, canChangeBackground: true, decoration: "flat") {
+      state "error", label: "Error",  backgroundColor: "#ffa81e"
+      state "bypass", label: "Bypass",  backgroundColor: "#ffa81e"
+      state "memory", label: "Memory",  backgroundColor: "#ffa81e"
+      state "armed", label: "Armed",  backgroundColor: "#ffa81e"
+      state "ready", label: "Ready",  backgroundColor: "#79b821"
+    }
+    standardTile("refresh", "device.backdoor", inactiveLabel: false, decoration: "flat") {
+      state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
+    }
+    
+        main "Frontdoors"
+    details("Frontdoors","Motion","Frontwindows","Familyroomwindows","Kitchenwindows","Backdoor","alarmStatus","refresh")
+  }
+}
+
+// Parse incoming device messages to generate events
+def parse(String description) {
+  def msg = parseLanMessage(description)
+  def headerString = msg.header
+
+  def result = []
+  def bodyString = msg.body
+  def value = "";
+  if (bodyString) {
+    log.debug bodyString
+    def json = msg.json;
+    if( json?.name == "Frontdoors") {
+      log.debug "${json?.name} value ${value}"
+      value = json.value
+      if(value == 0) {
+      log.debug "Frontdoors, value ${value}"
+      result << createEvent(name: "Frontdoors", value: "open", isStateChange: true)
+      }
+      else if(value == 1) {
+      log.debug "Frontdoors, value ${value}"
+      result << createEvent(name: "Frontdoors", value: "closed", isStateChange: true)
+      }
+      }
+    else if( json?.name == "Motion") {
+      log.debug "${json?.name} value ${value}"
+      value = json.value
+      if(value == 0) {
+      log.debug "Motion, value ${value}"
+      result << createEvent(name: "Motion", value: "active", isStateChange: true)
+      }
+      else if(value == 1) {
+      log.debug "Motion, value ${value}"
+      result << createEvent(name: "Motion", value: "inactive", isStateChange: true)
+      }
+      }
+    else if( json?.name == "Frontwindows") {
+      log.debug "${json?.name} value ${value}"
+      value = json.value
+      if(value == 0) {
+      log.debug "Frontwindows, value ${value}"
+      result << createEvent(name: "Frontwindows", value: "open", isStateChange: true)
+      }
+      else if(value == 1) {
+      log.debug "Frontwindows, value ${value}"
+      result << createEvent(name: "Frontwindows", value: "closed", isStateChange: true)
+      }
+      }
+    else if( json?.name == "Familyroomwindows") {
+      log.debug "${json?.name} value ${value}"
+      value = json.value
+      if(value == 0) {
+      log.debug "Familyroomwindows, value ${value}"
+      result << createEvent(name: "Familyroomwindows", value: "open", isStateChange: true)
+      }
+      else if(value == 1) {
+      log.debug "Familyroomwindows, value ${value}"
+      result << createEvent(name: "Familyroomwindows", value: "closed", isStateChange: true)
+      }
+      }
+    else if( json?.name == "Kitchenwindows") {
+      log.debug "${json?.name} value ${value}"
+      value = json.value
+      if(value == 0) {
+      log.debug "Kitchenwindows, value ${value}"
+      result << createEvent(name: "Kitchenwindows", value: "open", isStateChange: true)
+      }
+      else if(value == 1) {
+      log.debug "Kitchenwindows, value ${value}"
+      result << createEvent(name: "Kitchenwindows", value: "closed", isStateChange: true)
+      }
+      }
+    else if( json?.name == "Backdoor") {
+      log.debug "${json?.name} value ${value}"
+      value = json.value
+      if(value == 0) {
+      log.debug "Backdoor, value ${value}"
+      result << createEvent(name: "Backdoor", value: "open", isStateChange: true)
+      }
+      else if(value == 1) {
+      log.debug "Backdoor, value ${value}"
+      result << createEvent(name: "Backdoor", value: "closed", isStateChange: true)
+      }
+      }
+     else if( json?.name == "alarmStatus") {
+      log.debug "${json?.name} value ${value}"
+      value = json.value
+      if(value == 1) {
+      log.debug "alarmStatus, value ${value}"
+      result << createEvent(name: "alarmStatus", value: "error", isStateChange: true)
+      }
+      else if(value == 2) {
+      log.debug "alarmStatus, value ${value}"
+      result << createEvent(name: "alarmStatus", value: "bypass", isStateChange: true)
+      }
+      else if(value == 3) {
+      log.debug "alarmStatus, value ${value}"
+      result << createEvent(name: "alarmStatus", value: "memory", isStateChange: true)
+      }
+      else if(value == 4) {
+      log.debug "alarmStatus, value ${value}"
+      result << createEvent(name: "alarmStatus", value: "armed", isStateChange: true)
+      }
+      else if(value == 5) {
+      log.debug "alarmStatus, value ${value}"
+      result << createEvent(name: "alarmStatus", value: "ready", isStateChange: true)
+      }
+      }
+ }
+  result
+}
+
+private Integer convertHexToInt(hex) {
+  Integer.parseInt(hex,16)
+}
+
+private getHostAddress() {
+  def ip = settings.ip
+  def port = settings.port
+
+  log.debug "Using ip: ${ip} and port: ${port} for device: ${device.id}"
+  return ip + ":" + port
+}
+
+def refresh() {
+  log.debug "Executing 'refresh' ${getHostAddress()}"
+  if(!settings.mac) {
+    // if mac address is blank in settings, then use ip:port, but ST will not get updates it will only get Poll results.
+    log.debug "setting device network id to ip:port"
+    def hosthex = convertIPtoHex(settings.ip)
+    def porthex = convertPortToHex(settings.port)
+    device.deviceNetworkId = "$hosthex:$porthex" 
+    } else {
+    if(device.deviceNetworkId!=settings.mac) {
+        log.debug "setting device network id to mac"
+        device.deviceNetworkId = settings.mac;
+      }
+  }
+    poll()
+}
+
+def poll() {
+  log.debug "Executing 'poll' ${getHostAddress()}"
+  new physicalgraph.device.HubAction(
+      method: "GET",
+      path: "/getstatus",
+      headers: [ HOST: "${getHostAddress()}"]
+      )
+}
+private String convertIPtoHex(ipAddress) { 
+    String hex = ipAddress.tokenize( '.' ).collect {  String.format( '%02x', it.toInteger() ) }.join()
+    return hex
+}
+
+private String convertPortToHex(port) {
+  String hexport = port.toString().format( '%04x', port.toInteger() )
+    return hexport
+}
