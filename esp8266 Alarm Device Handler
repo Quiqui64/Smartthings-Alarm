@@ -25,6 +25,7 @@ metadata {
     capability "Polling"
     capability "Contact Sensor"
     capability "Motion Sensor"
+    capability "Alarm"
     
     attribute "Frontdoors", "string"
     attribute "Motion", "string"
@@ -33,7 +34,10 @@ metadata {
     attribute "Kitchenwindows", "string"
     attribute "Backdoor", "string"
     attribute "Ready", "string"
-    attribute "alarmStatus", "string"
+    attribute "Armed", "string"
+    attribute "Error", "string"
+    attribute "Bypass", "string"
+    attribute "Memory", "string"
   }
 
   // UI tile definitions
@@ -63,24 +67,24 @@ tiles {
       state "closed", label: "Backdoor", icon: "st.contact.contact.closed", backgroundColor: "#79b821"
     }
     standardTile("Ready", "device.Ready", width: 1.5, height: 1.5, canChangeBackground: true, canChangeIcon: true) {
-      state "notReady",   label: "Not Ready", icon: "st.contact.contact.open",   backgroundColor: "#bc2323"
-      state "ready", label: "Ready", icon: "st.contact.contact.closed", backgroundColor: "#79b821"
+      state "notReady",   label: "Not Ready", icon: "st.alarm.alarm.alarm",   backgroundColor: "#bc2323"
+      state "ready", label: "Ready", icon: "st.alarm.alarm.alarm", backgroundColor: "#79b821"
     }
     standardTile("Armed", "device.Armed", width: 1.5, height: 1.5, canChangeBackground: true, canChangeIcon: true) {
-      state "notArmed",   label: "Not Armed", icon: "st.contact.contact.open",   backgroundColor: "#bc2323"
-      state "armed", label: "Armed", icon: "st.contact.contact.closed", backgroundColor: "#79b821"
+      state "notArmed",   label: "Alarm Off", icon: "st.alarm.alarm.alarm",   backgroundColor: "#bc2323"
+      state "armed", label: "Alarm On", icon: "st.alarm.alarm.alarm", backgroundColor: "#79b821"
     }
     standardTile("Error", "device.Error", width: 1.5, height: 1.5, canChangeBackground: true, canChangeIcon: true) {
-      state "noError",   label: "No Error", icon: "st.contact.contact.open",   backgroundColor: "#79b821"
-      state "error", label: "Error", icon: "st.contact.contact.closed", backgroundColor: "#bc2323"
+      state "noError",   label: "No Error", icon: "st.alarm.alarm.alarm",   backgroundColor: "#79b821"
+      state "error", label: "Error", icon: "st.alarm.alarm.alarm", backgroundColor: "#bc2323"
     }
     standardTile("Bypass", "device.Bypass", width: 1.5, height: 1.5, canChangeBackground: true, canChangeIcon: true) {
-      state "noBypass",   label: "No Bypass", icon: "st.contact.contact.open",   backgroundColor: "#79b821"
-      state "bypass", label: "Bypass", icon: "st.contact.contact.closed", backgroundColor: "#ffa81e"
+      state "noBypass",   label: "No Bypass", icon: "st.alarm.alarm.alarm",   backgroundColor: "#79b821"
+      state "bypass", label: "Bypass", icon: "st.alarm.alarm.alarm", backgroundColor: "#ffa81e"
     }
     standardTile("Memory", "device.Memory", width: 1.5, height: 1.5, canChangeBackground: true, canChangeIcon: true) {
-      state "noMemory",   label: "No Memory", icon: "st.contact.contact.open",   backgroundColor: "#79b821"
-      state "memory", label: "Memory", icon: "st.contact.contact.closed", backgroundColor: "#ffa81e"
+      state "noMemory",   label: "No Memory", icon: "st.alarm.alarm.alarm",   backgroundColor: "#79b821"
+      state "memory", label: "Memory", icon: "st.alarm.alarm.alarm", backgroundColor: "#ffa81e"
     }
     standardTile("refresh", "device.backdoor", inactiveLabel: false, decoration: "flat") {
       state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
