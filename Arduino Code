@@ -12,22 +12,27 @@
 #include <WiFiUdp.h> // For OTA
 #include <ArduinoOTA.h> // For OTA
 
-const char* ssid = "XXXXXXXXXX";
-const char* password = "XXXXXXXXX";
+const char* ssid = "Casa"; // your router login mame
+const char* password = "brownclan"; // your router password
 const unsigned int serverPort = 8090; // port to run the http server on esp8266, for smartthings hub
 WiFiServer server(serverPort); //server
 WiFiClient client; //client
 String readString;
+int alarmStatus = 0;
 // Smartthings hub information
 IPAddress hubIp(192, 168, 1, 170); // smartthings hub ip
 const unsigned int hubPort = 39500; // smartthings hub port
-int zone1State = 0;
-int zone2State = 0;
-int zone3State = 0;
-int zone4State = 0;
-int zone5State = 0;
-int zone6State = 0;
-
+int zone1State = 1;
+int zone2State = 1;
+int zone3State = 1;
+int zone4State = 1;
+int zone5State = 1;
+int zone6State = 1;
+int errorState = 1;
+int bypassState = 1;
+int memoryState = 1;
+int armedState = 1;
+int readyState = 1;
 char hex[] = "0123456789abcdef"; // For Keybus
 String st, old; // For Keybus
 unsigned long lastData; // For Keybus
@@ -116,32 +121,53 @@ unsigned long crc_string(char *s)
 // send data
 int sendNotify(int a) //client function to send/receieve POST data.
 {
-  String tempSensor; // holds the sensor data converted from float
+  String tempValue; // holds the sensor data converted from float
   String tempName; // holds the name of sensor
   int returnStatus = 1;
   if(a == 1){
-    tempSensor = zone1State;// convert to string
+    tempValue = zone1State;// convert to string
     tempName = "{\"name\":\"Frontdoors\",\"value\":";// for zone1
   }
   else if(a == 2){
-    tempSensor = zone2State;// convert to string
+    tempValue = zone2State;// convert to string
     tempName = "{\"name\":\"Motion\",\"value\":";// for zone2 motion detectors
   }
   else if(a == 3){
-    tempSensor = zone3State;// convert to string
+    tempValue = zone3State;// convert to string
     tempName = "{\"name\":\"Frontwindows\",\"value\":";// for zone3
   }
   else if(a == 4){
-    tempSensor = zone4State;// convert to string
+    tempValue = zone4State;// convert to string
     tempName = "{\"name\":\"Familyroomwindows\",\"value\":";// for zone4
   }
   else if(a == 5){
-    tempSensor = zone5State;// convert to string
+    tempValue = zone5State;// convert to string
     tempName = "{\"name\":\"Kitchenwindows\",\"value\":";// for zone5
   }
   else if(a == 6){
-    tempSensor = zone6State;// convert to string
+    tempValue = zone6State;// convert to string
     tempName = "{\"name\":\"Backdoor\",\"value\":";// for zone6
+  }
+  // left open for zones 7 & 8 if used later
+  else if(a == 9){
+    tempValue = errorState;// convert to string
+    tempName = "{\"name\":\"Error\",\"value\":";// for alarm status
+  }
+  else if(a == 10){
+    tempValue = bypassState;// convert to string
+    tempName = "{\"name\":\"Bypass\",\"value\":";// for alarm status
+  }
+  else if(a == 11){
+    tempValue = memoryState;// convert to string
+    tempName = "{\"name\":\"Memory\",\"value\":";// for alarm status
+  }
+  else if(a == 12){
+    tempValue = armedState;// convert to string
+    tempName = "{\"name\":\"Armed\",\"value\":";// for alarm status
+  }
+  else if(a == 13){
+    tempValue = readyState;// convert to string
+    tempName = "{\"name\":\"Ready\",\"value\":";// for alarm status
   }
   
   if (client.connect(hubIp, hubPort)) {
@@ -153,18 +179,18 @@ int sendNotify(int a) //client function to send/receieve POST data.
     //Build JSON string
     client.println(F("CONTENT-TYPE: application/json"));
     client.print(F("CONTENT-LENGTH: "));
-    client.println((1+tempSensor.length())+tempName.length());
+    client.println((1+tempValue.length())+tempName.length());
     client.println();
     client.print(tempName);
-    client.print(tempSensor);
+    client.print(tempValue);
     client.println(F("}"));
   // 25 chars plus temp
 //    Serial.println(F("CONTENT-TYPE: application/json"));
 //    Serial.print(F("CONTENT-LENGTH: "));
-//    Serial.println((1+tempSensor.length())+tempName.length());
+//    Serial.println((1+tempValue.length())+tempName.length());
 //    Serial.println();
 //    Serial.print(tempName);
-//    Serial.print(tempSensor);
+//    Serial.print(tempValue);
 //    Serial.println(F("}"));
 //    Serial.println("fanState is");
 //    Serial.println(fanState);
@@ -214,6 +240,11 @@ void handleRequest(WiFiClient client)
     sendNotify(4);
     sendNotify(5);
     sendNotify(6);
+    sendNotify(9);
+    sendNotify(10);
+    sendNotify(11);
+    sendNotify(12);
+    sendNotify(13);
   }
   else if (req.indexOf(F("/fanOff")) != -1) {// command to turn on fan
     client.println(F("HTTP/1.1 200 OK")); //send new page
@@ -225,11 +256,7 @@ void handleRequest(WiFiClient client)
    // autoFanState = 1;
   //  sendNotify(5); // send fan autoOff state to hub
   }
-  else if (req.indexOf(F("/autoOn")) != -1) {// command to turn off fan
-    client.println(F("HTTP/1.1 200 OK")); //send new page
-  //  autoFanState = 2;
-  //  sendNotify(5); // send fan autoOff state to hub
-  }
+  
   else {
     client.println(F("HTTP/1.1 204 No Content"));
     client.println();
@@ -319,14 +346,78 @@ void loop()
   String msg;
  
   // Interpreter les donnees
-  if (cmd == 0x05)
-  {
-    if (getBinaryData(stc,12,1)) msg += "Error";
-    if (getBinaryData(stc,13,1)) msg += "Bypass";
-    if (getBinaryData(stc,14,1)) msg += "Memory";
-    if (getBinaryData(stc,15,1)) msg += "Armed";
-    if (getBinaryData(stc,16,1)) msg += "Ready";
-  }
+  if (cmd == 0x05){
+    int Error = getBinaryData(stc,12,1);
+    int Bypass = getBinaryData(stc,13,1);
+    int Memory = getBinaryData(stc,14,1);
+    int Armed = getBinaryData(stc,15,1);
+    int Ready = getBinaryData(stc,16,1);
+    if (Error & 1){
+      if(errorState == 1){
+        errorState = 0;
+        sendNotify(9);
+        // msg += "Error"
+      }
+    }
+    else{
+      if(errorState == 0){
+        errorState = 1;
+        sendNotify(9);
+      }
+    }
+    if (Bypass & 1){
+      if(bypassState == 1){
+        bypassState = 0;
+        sendNotify(10);
+        // msg += "Bypass"
+      }
+    }
+    else{
+      if(bypassState == 0){
+        bypassState = 1;
+        sendNotify(10);
+      }
+    }
+    if (Memory & 1){
+      if(memoryState == 1){
+        memoryState = 0;
+        sendNotify(11);
+        // msg += "Memory"
+      }
+    }
+    else{
+      if(memoryState == 0){
+        memoryState = 1;
+        sendNotify(11);
+      }
+    }
+    if (Armed & 1){
+      if(armedState == 1){
+        armedState = 0;
+        sendNotify(12);
+        // msg += "Armed"
+      }
+    }
+    else{
+      if(armedState == 0){
+        armedState = 1;
+        sendNotify(12);
+      }
+    }
+    if (Ready & 1){
+      if(readyState == 1){
+        readyState = 0;
+        sendNotify(13);
+        // msg += "Ready"
+      }
+    }
+    else{
+      if(readyState == 0){
+        readyState = 1;
+        sendNotify(13);
+      }
+    }
+}
  
 //  if (cmd == 0xa5) // May use later to verify everything is talking
 //  {
@@ -425,6 +516,8 @@ void loop()
 //  Serial.println(msg);
 
 }
+
+
 
 
 
