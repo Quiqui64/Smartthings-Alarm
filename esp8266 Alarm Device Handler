@@ -65,7 +65,7 @@ tiles {
       state "error", label: "Error",  backgroundColor: "#ffa81e"
       state "bypass", label: "Bypass",  backgroundColor: "#ffa81e"
       state "memory", label: "Memory",  backgroundColor: "#ffa81e"
-      state "armed", label: "Armed",  backgroundColor: "#ffa81e"
+      state "armed", label: "Armed",  backgroundColor: "#bc2323"
       state "ready", label: "Ready",  backgroundColor: "#79b821"
     }
     standardTile("refresh", "device.backdoor", inactiveLabel: false, decoration: "flat") {
