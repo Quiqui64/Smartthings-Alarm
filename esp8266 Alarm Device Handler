@@ -32,6 +32,7 @@ metadata {
     attribute "Familyroomwindows", "string"
     attribute "Kitchenwindows", "string"
     attribute "Backdoor", "string"
+    attribute "Ready", "string"
     attribute "alarmStatus", "string"
   }
 
@@ -61,19 +62,32 @@ tiles {
       state "open",   label: "Backdoor", icon: "st.contact.contact.open",   backgroundColor: "#ffa81e"
       state "closed", label: "Backdoor", icon: "st.contact.contact.closed", backgroundColor: "#79b821"
     }
-    standardTile("alarmStatus", "device.alarmStatus", width: 1.5, height: 1.5, canChangeBackground: true, decoration: "flat") {
-      state "error", label: "Error",  backgroundColor: "#ffa81e"
-      state "bypass", label: "Bypass",  backgroundColor: "#ffa81e"
-      state "memory", label: "Memory",  backgroundColor: "#ffa81e"
-      state "armed", label: "Armed",  backgroundColor: "#bc2323"
-      state "ready", label: "Ready",  backgroundColor: "#79b821"
+    standardTile("Ready", "device.Ready", width: 1.5, height: 1.5, canChangeBackground: true, canChangeIcon: true) {
+      state "notReady",   label: "Not Ready", icon: "st.contact.contact.open",   backgroundColor: "#bc2323"
+      state "ready", label: "Ready", icon: "st.contact.contact.closed", backgroundColor: "#79b821"
+    }
+    standardTile("Armed", "device.Armed", width: 1.5, height: 1.5, canChangeBackground: true, canChangeIcon: true) {
+      state "notArmed",   label: "Not Armed", icon: "st.contact.contact.open",   backgroundColor: "#bc2323"
+      state "armed", label: "Armed", icon: "st.contact.contact.closed", backgroundColor: "#79b821"
+    }
+    standardTile("Error", "device.Error", width: 1.5, height: 1.5, canChangeBackground: true, canChangeIcon: true) {
+      state "noError",   label: "No Error", icon: "st.contact.contact.open",   backgroundColor: "#79b821"
+      state "error", label: "Error", icon: "st.contact.contact.closed", backgroundColor: "#bc2323"
+    }
+    standardTile("Bypass", "device.Bypass", width: 1.5, height: 1.5, canChangeBackground: true, canChangeIcon: true) {
+      state "noBypass",   label: "No Bypass", icon: "st.contact.contact.open",   backgroundColor: "#79b821"
+      state "bypass", label: "Bypass", icon: "st.contact.contact.closed", backgroundColor: "#ffa81e"
+    }
+    standardTile("Memory", "device.Memory", width: 1.5, height: 1.5, canChangeBackground: true, canChangeIcon: true) {
+      state "noMemory",   label: "No Memory", icon: "st.contact.contact.open",   backgroundColor: "#79b821"
+      state "memory", label: "Memory", icon: "st.contact.contact.closed", backgroundColor: "#ffa81e"
     }
     standardTile("refresh", "device.backdoor", inactiveLabel: false, decoration: "flat") {
       state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
     }
     
         main "Frontdoors"
-    details("Frontdoors","Motion","Frontwindows","Familyroomwindows","Kitchenwindows","Backdoor","alarmStatus","refresh")
+    details("Frontdoors","Motion","Frontwindows","Familyroomwindows","Kitchenwindows","Backdoor","Ready","Armed","Error","Bypass","Memory","refresh")
   }
 }
 
@@ -160,30 +174,67 @@ def parse(String description) {
       result << createEvent(name: "Backdoor", value: "closed", isStateChange: true)
       }
       }
-     else if( json?.name == "alarmStatus") {
+      else if( json?.name == "Ready") {
       log.debug "${json?.name} value ${value}"
       value = json.value
-      if(value == 1) {
-      log.debug "alarmStatus, value ${value}"
-      result << createEvent(name: "alarmStatus", value: "error", isStateChange: true)
+      if(value == 0) {
+      log.debug "Ready, value ${value}"
+      result << createEvent(name: "Ready", value: "ready", isStateChange: true)
       }
-      else if(value == 2) {
-      log.debug "alarmStatus, value ${value}"
-      result << createEvent(name: "alarmStatus", value: "bypass", isStateChange: true)
-      }
-      else if(value == 3) {
-      log.debug "alarmStatus, value ${value}"
-      result << createEvent(name: "alarmStatus", value: "memory", isStateChange: true)
-      }
-      else if(value == 4) {
-      log.debug "alarmStatus, value ${value}"
-      result << createEvent(name: "alarmStatus", value: "armed", isStateChange: true)
-      }
-      else if(value == 5) {
-      log.debug "alarmStatus, value ${value}"
-      result << createEvent(name: "alarmStatus", value: "ready", isStateChange: true)
+      else if(value == 1) {
+      log.debug "Ready, value ${value}"
+      result << createEvent(name: "Ready", value: "notReady", isStateChange: true)
       }
       }
+      else if( json?.name == "Armed") {
+      log.debug "${json?.name} value ${value}"
+      value = json.value
+      if(value == 0) {
+      log.debug "Armed, value ${value}"
+      result << createEvent(name: "Armed", value: "armed", isStateChange: true)
+      }
+      else if(value == 1) {
+      log.debug "Armed, value ${value}"
+      result << createEvent(name: "Armed", value: "notArmed", isStateChange: true)
+      }
+      }
+      else if( json?.name == "Error") {
+      log.debug "${json?.name} value ${value}"
+      value = json.value
+      if(value == 0) {
+      log.debug "Error, value ${value}"
+      result << createEvent(name: "Error", value: "error", isStateChange: true)
+      }
+      else if(value == 1) {
+      log.debug "Error, value ${value}"
+      result << createEvent(name: "Error", value: "noError", isStateChange: true)
+      }
+      }
+      else if( json?.name == "Bypass") {
+      log.debug "${json?.name} value ${value}"
+      value = json.value
+      if(value == 0) {
+      log.debug "Bypass, value ${value}"
+      result << createEvent(name: "Bypass", value: "bypass", isStateChange: true)
+      }
+      else if(value == 1) {
+      log.debug "Bypass, value ${value}"
+      result << createEvent(name: "Bypass", value: "noBypass", isStateChange: true)
+      }
+      }
+      else if( json?.name == "Memory") {
+      log.debug "${json?.name} value ${value}"
+      value = json.value
+      if(value == 0) {
+      log.debug "Memory, value ${value}"
+      result << createEvent(name: "Memory", value: "memory", isStateChange: true)
+      }
+      else if(value == 1) {
+      log.debug "Memory, value ${value}"
+      result << createEvent(name: "Memory", value: "noMemory", isStateChange: true)
+      }
+      }
+      
  }
   result
 }
