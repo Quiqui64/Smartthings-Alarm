@@ -1,6 +1,6 @@
 # Smartthings-Alarm
 
-Special thanks to a Smartthings forum regular Daniel Ogorchock and 
+Special thanks to a Smartthings forum regular Daniel Ogorchock for the groovy code. 
 
 Cation when connecting the ESP8266 to the alarm keypad bus. Keypad bus uses 12V logic and the esp8266 uses 3.3V logic you need to use a voltage divider circuit or as I did a logic level converter https://www.sparkfun.com/products/12009
 The original Arduino code came from these sources
