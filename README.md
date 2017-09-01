@@ -6,7 +6,7 @@ Cation when connecting the ESP8266 to the alarm keypad bus. Keypad bus uses 12V 
 The original Arduino code came from these sources
 http://www.avrfreaks.net/comment/804380#comment-804380 and https://github.com/emcniece/Arduino-Keybus
 
-I tried to use this code but could not get it to work on the esp8266, I believe the problem has something to do with the ISR needs to be loaded into the esp8266 iram.
+I tried to use this code https://github.com/dougkpowers/pc1550-interface but could not get it to work on the esp8266, I believe the problem has something to do with the ISR needs to be loaded into the esp8266 iram.
 
 const char* ssid = "XXXXXXXXXX"; // your router login name
 const char* password = "XXXXXXXXX"; // your router password
